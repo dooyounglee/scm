@@ -22,5 +22,14 @@ public class SvnServiceImpl {
     public List<Revision> selectRevisionsByFile(RevisionSelect dto) {
         return SvnUtil.getFileRevisions(dto.getFile(), 1, -1);
     }
+
+    public String selectFileContent(RevisionSelect dto) {
+        System.out.println(SvnUtil.displayFileContent(dto.getFile(), dto.getRevision()));
+        return SvnUtil.displayFileContent(dto.getFile(), dto.getRevision());
+    }
+
+    public String selectFileDiff(RevisionSelect dto) {
+        return SvnUtil.compareRevision(dto.getFile(), dto.getRevision(), dto.getRevision1());
+    }
     
 }

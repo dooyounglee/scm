@@ -1,5 +1,6 @@
 package com.doo.scm.common;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,9 +9,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNLogEntry;
 import org.tmatesoft.svn.core.SVNLogEntryPath;
+import org.tmatesoft.svn.core.SVNProperties;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.io.ISVNFileRevisionHandler;
@@ -19,6 +22,8 @@ import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.io.diff.SVNDiffWindow;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNDiffClient;
+import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 import com.doo.scm.svn.domain.ChangedPath;
@@ -42,6 +47,16 @@ public class SvnUtil {
             e.printStackTrace();
         }
         return svnUrl;
+    }
+
+    public static SVNURL getSvnUrl(String filePath) {
+        try {
+            return SVNURL.parseURIEncoded(filePath);
+        } catch (SVNException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static SVNClientManager clientManagerInstance() {
@@ -137,5 +152,38 @@ public class SvnUtil {
         }
 
         return list;
+    }
+
+    public static String compareRevision(String filePath, long revision1, long revision2) {
+        SVNClientManager clientManager = clientManagerInstance();
+        SVNDiffClient diffClient = clientManager.getDiffClient();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        SVNURL svnUrl = getSvnUrl(url + "/" + filePath);
+        try {
+            // diffClient.doDiff(svnUrl, SVNRevision.create(1), svnUrl, SVNRevision.HEAD, false, false, System.out);
+            diffClient.doDiff(svnUrl, SVNRevision.create(revision1), svnUrl, SVNRevision.create(revision2), false, false, baos);
+            return new String(baos.toByteArray(), "UTF-8");
+        } catch (SVNException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String displayFileContent(String filePath, long revision) {
+        SVNProperties fileProperties = new SVNProperties();
+        SVNRepository repository = getSvnRepository();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            repository.getFile(filePath, revision, fileProperties, baos);
+            // baos.writeTo(System.out);
+            return new String(baos.toByteArray(), "UTF-8");
+        } catch (SVNException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

@@ -11,11 +11,13 @@ public class RevisionRequest {
     public static class RevisionSelect {
         private long revision;
         private String file;
+        private long revision1;
 
         @Builder
-        public RevisionSelect(long revision, String file) {
+        public RevisionSelect(long revision, String file, long revision1) {
             this.revision = revision;
             this.file = file;
+            this.revision1 = revision1;
         }
     }
 }

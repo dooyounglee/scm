@@ -11,4 +11,9 @@ public class WebController {
     public String revisions() {
         return "svn/revision";
     }
+
+    @RequestMapping("/history")
+    public String history() {
+        return "git/history";
+    }
 }

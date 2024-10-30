@@ -18,6 +18,7 @@ public class SvnResponse {
     private Date date;
     private String message;
     private List<ChangedPath> changedPath;
+    private String fileContent;
 
     public static SvnResponse from(Revision revision) {
         return SvnResponse.builder()
@@ -26,6 +27,12 @@ public class SvnResponse {
             .date(revision.getDate())
             .message(revision.getMessage())
             .changedPath(revision.getChangedPath())
+            .build();
+    }
+
+    public static SvnResponse from(String selectFileContent) {
+        return SvnResponse.builder()
+            .fileContent(selectFileContent)
             .build();
     }
 }

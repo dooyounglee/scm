@@ -43,4 +43,18 @@ public class SvnController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(svnService.selectRevisionsByFile(dto).stream().map(revision -> SvnResponse.from(revision)).toList());
     }
+
+    @ResponseBody
+    @RequestMapping("/selectFileContent")
+    public ResponseEntity<SvnResponse> selectFileContent(@RequestBody RevisionSelect dto) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(SvnResponse.from(svnService.selectFileContent(dto)));
+    }
+
+    @ResponseBody
+    @RequestMapping("/selectFileDiff")
+    public ResponseEntity<SvnResponse> selectFileDiff(@RequestBody RevisionSelect dto) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(SvnResponse.from(svnService.selectFileDiff(dto)));
+    }
 }
