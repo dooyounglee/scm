@@ -12,8 +12,13 @@ public class WebController {
         return "svn/revision";
     }
 
+    @RequestMapping("/commits")
+    public String commits() {
+        return "gitea/commits";
+    }
+
     @RequestMapping("/history")
     public String history() {
-        return "git/history";
+        return "github/history";
     }
 }
