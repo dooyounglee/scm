@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +124,6 @@ public class SvnUtil {
 
         SVNRepository repository = getSvnRepository();
 
-        Map<Long, String> fileRevisionsToDates = new HashMap<>();
         try {
             repository.getFileRevisions(path, startRevision, endRevision, false, new ISVNFileRevisionHandler() {
                 public void applyTextDelta(String path, String baseChecksum) throws SVNException {
