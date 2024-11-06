@@ -90,41 +90,76 @@ const compareCommits = (result, path) => {
     compare = compare.replace(/ @@ /gi," @@\n ");
     compare = compare.split("\n");
     var skip = 0;
+    var line_before = 0;
+    var line_after = 0;
     for (var i=0;i<compare.length;i++) {
         console.log(compare[i]);
+        if (compare[i][0] == "@" && compare[i][1] == "@") {
+            var _minus = compare[i].indexOf("-");
+            var _minus_comma = compare[i].indexOf(",", _minus);
+            line_before = parseInt(compare[i].substring(_minus+1,_minus_comma));
+            line_before = Math.max(line_before,3);
+            var _plus = compare[i].indexOf("+");
+            var _plus_comma = compare[i].indexOf(",", _plus);
+            line_after = parseInt(compare[i].substring(_plus+1,_plus_comma));
+            line_after = Math.max(line_after,3);
+        }
         var a = compare[i];
-        var before, after;
+        var before, after, before_line, after_line;
         var head = a[0];
-        if (head == "+" && compare[i-1][0] == "-") {
+        if (head == "@") {
+            before_line = "";
+            after_line = "";
+            before = a;
+            after = a;
+        } else if (head == "+" && compare[i-1][0] == "-") {
             skip++;
             continue;
         } else if (head == "-" && compare[i+1][0] == "+") {
+            before_line = line_before++;
+            after_line = line_after++;
             before = a;
             after = compare[i+1];
         } else if (head == "+") {
+            before_line = "";
+            after_line = line_after++;
             before = "";
             after = a;
         } else if (head == "-") {
+            before_line = line_before++;
+            after_line = "";
             before = a;
             after = "";
         } else {
+            before_line = line_before++;
+            after_line = line_after++;
             before = a;
             after = a;
         }
-        // console.log(a,before,after)
         
         function view() {
             var tb = document.getElementById("tb")
-            tb.innerHTML += '<tr><td></td><td align="center"></td><td></td></tr>';
+            tb.innerHTML += '<tr><td align="center"></td><td></td><td align="center"></td><td></td></tr>';
             var lastTr = $("#tb tr:last-child").get().reverse()[0];
             var td = lastTr.getElementsByTagName('td');
-            td[0].innerText += before[0] == "-" ? " " + before.substring(1) : before;
-            if (before[0] == "-") td[0].style = "background-color:#ffc4c4;";
-            td[1].innerText += i-skip;
-            td[2].innerText += after[0] == "+" ? " " + after.substring(1) : after;
-            if (after[0] == "+") td[2].style = "background-color:#caffca;";
+            td[0].innerText += before_line;
+            td[1].innerText += before[0] == "-" ? " " + before.substring(1) : before;
+            if (before[0] == "-") {
+                td[0].style = "background-color:#ffc4c4;";
+                td[1].style = "background-color:#ffc4c4;";
+            }
+            td[2].innerText += after_line;
+            td[3].innerText += after[0] == "+" ? " " + after.substring(1) : after;
+            if (after[0] == "+") {
+                td[2].style = "background-color:#caffca;";
+                td[3].style = "background-color:#caffca;";
+            }
         }
         view();
+
+        if (compare[i][0] == "@" && compare[i][1] == "@") {
+            i++;
+        }
     }
 }
 
