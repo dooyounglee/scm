@@ -1,6 +1,8 @@
 package com.doo.scm.svn.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,14 @@ public class SvnServiceImpl {
 
     public String selectFileDiff(RevisionSelect dto) {
         return SvnUtil.compareRevision(dto.getFile(), dto.getRevision(), dto.getRevision1());
+    }
+
+
+    public Map<String, String> deployReady() {
+        Map<String, String> map = new HashMap<>();
+        map.put("1","/src/main/java/SvnController.java");
+        map.put("2","/src/main/java/SvnController.java");
+        return map;
     }
     
 }
