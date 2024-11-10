@@ -33,6 +33,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
@@ -57,6 +61,34 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- oracle cloud database -->
+		<!-- https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc11 -->
+		<dependency>
+			<groupId>com.oracle.database.jdbc</groupId>
+			<artifactId>ojdbc11</artifactId>
+			<version>23.5.0.24.07</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.oracle.database.security/osdt_cert -->
+		<dependency>
+			<groupId>com.oracle.database.security</groupId>
+			<artifactId>osdt_cert</artifactId>
+			<version>21.15.0.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.oracle.database.security/oraclepki -->
+		<dependency>
+			<groupId>com.oracle.database.security</groupId>
+			<artifactId>oraclepki</artifactId>
+			<version>23.5.0.24.07</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.oracle.database.security/osdt_core -->
+		<dependency>
+			<groupId>com.oracle.database.security</groupId>
+			<artifactId>osdt_core</artifactId>
+			<version>21.15.0.0</version>
+		</dependency>
+		<!-- oracle cloud database -->
+
 		<!-- https://mvnrepository.com/artifact/org.tmatesoft.svnkit/svnkit -->
 		<dependency>
 			<groupId>org.tmatesoft.svnkit</groupId>
