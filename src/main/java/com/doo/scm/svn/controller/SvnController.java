@@ -61,7 +61,7 @@ public class SvnController {
 
     @ResponseBody
     @RequestMapping("/deployReady")
-    public ResponseEntity<Map<String, String>> deployReady() {
+    public ResponseEntity<List<Map<String, String>>> deployReady() {
         return ResponseEntity.status(HttpStatus.OK)
             .body(svnService.deployReady());
     }

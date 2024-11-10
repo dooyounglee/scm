@@ -1,5 +1,6 @@
 package com.doo.scm.svn.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,11 +36,27 @@ public class SvnServiceImpl {
     }
 
 
-    public Map<String, String> deployReady() {
+    public List<Map<String, String>> deployReady() {
+        List<Map<String, String>> list = new ArrayList<>();
         Map<String, String> map = new HashMap<>();
-        map.put("1","/src/main/java/SvnController.java");
-        map.put("2","/src/main/java/SvnController.java");
-        return map;
+        map.put("path","commit1.txt");
+        map.put("revision","1");
+        list.add(map);
+
+        map = new HashMap<>();
+        map.put("path","svn");
+        map.put("revision","2");
+        list.add(map);
+
+        map = new HashMap<>();
+        map.put("path","svn/commit2.txt");
+        map.put("revision","2");
+        list.add(map);
+
+        // return "echo 'jenkins' | sudo -kS svn update --username=doo --password=doo " + map.get("path") + " -r" + map.get("revision") + " --depth empty";
+        // return "1 commit1.txt,2 svn,2 svn/commit2.txt";
+        //return map;
+        return list;
     }
     
 }
