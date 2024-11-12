@@ -11,7 +11,10 @@ export const btnSelectCommits = () => {
 }
 
 export const selectCommits = (result) => {
-    $("#commits").html('');
+    clearCommits();
+    clearFiles();
+    clearCommitsByFile();
+    clearCompare();
     result.forEach(element => {
         var str = "<tr>";
         str += `<td>${element.sha}</td>`;
@@ -31,7 +34,9 @@ export const btnSelectFiles = (sha) => {
 }
 
 const selectFiles = (result, sha) => {
-    $("#files").html('');
+    clearFiles();
+    clearCommitsByFile();
+    clearCompare();
     result.files.forEach(element => {
         var str = "<tr>";
         str += "<td>" + element.filename + "</td>";
@@ -53,7 +58,8 @@ const btnSelectCommitsByFile = (path) => {
 }
 
 const selectCommitsByFile = (result, path) => {
-    $("#commitsByFile").html('');
+    clearCommitsByFile();
+    clearCompare();
     result.forEach(element => {
         var str = "<tr>";
         str += `<td><input type="checkbox" name="commit" value="${element.sha}"></td>`
@@ -84,7 +90,8 @@ const btnCompareCommits = (path) => {
 }
 
 const compareCommits = (result, path) => {
-    document.getElementById("tb").innerHTML = '';
+    clearCompare();
+    alert(path)
     
     var compare = result.files.filter(file => file.previous_filename || file.filename == path)[0].patch;
     compare = compare.replace(/ @@ /gi," @@\n ");
@@ -92,6 +99,7 @@ const compareCommits = (result, path) => {
     var skip = 0;
     var line_before = 0;
     var line_after = 0;
+    console.log(compare)
     for (var i=0;i<compare.length;i++) {
         console.log(compare[i]);
         if (compare[i][0] == "@" && compare[i][1] == "@") {
@@ -161,6 +169,22 @@ const compareCommits = (result, path) => {
             i++;
         }
     }
+}
+
+const clearCommits = () => {
+    $("#commits").html('');
+}
+
+const clearFiles = () => {
+    $("#files").html('');
+}
+
+const clearCommitsByFile = () => {
+    $("#commitsByFile").html('');
+}
+
+const clearCompare = () => {
+    document.getElementById("tb").innerHTML = '';
 }
 
 export const api = async (url, method, callback, args) => {
