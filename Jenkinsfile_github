@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+    stages {
+        stage("Hello") {
+            steps {
+                sh 'pwd'
+                sh 'whoami'
+                sh 'cd github'
+            }
+        }
+        stage("Checkout") {
+            steps {
+                script {
+                    def response = sh(script: 'curl -X GET "http://host.docker.internal:8080/github/deployReady"', returnStdout: true)
+                    echo "${response}"
+                    def json = readJSON text: response
+                    echo "${json}"
+                    
+                    json.each { line ->
+                        echo "${line}"
+                        echo "${line.commitId}"
+                        echo "${line.path}"
+                        
+                        sh "echo \'jenkins\' | sudo -kS git checkout ${line.commitId} ${line.path}"
+                    }
+                }
+            }
+        }
+        stage("Deploy Success") {
+            steps {
+                script {
+                    def response = sh(script: 'curl -X GET "http://host.docker.internal:8080/github/updateDeployApply"', returnStdout: true)
+                    echo "${response} updates"
+                }
+            }
+        }
+    }
+}
