@@ -263,3 +263,159 @@ function selectApply(applyNo) {
         }
     });
 }
+
+let deployList = [];
+                
+function addDeployList() {
+    var selectedRevision = $("#selectedRevision").text();
+    $("input[name='path']:checked").each((i,e) => {
+        var index = deployList.findIndex(i => i.path == e.value.substring(1) && i.revision == selectedRevision);
+        if (index > -1) return false;
+
+        var obj = {};
+        obj["revision"] = selectedRevision;
+        obj["path"] = e.value.substring(1);
+        deployList.push(obj);
+    });
+
+    showList();
+}
+
+function checkDeployList() {
+    $.ajax({
+        type: 'post',
+        url: '/svn/checkDeployList',
+        async: true,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        dataType: 'json',
+        data: JSON.stringify(deployList),
+        success: (result) => {
+            result.forEach(e => {
+                var index = deployList.findIndex(i => i.path == e.path);
+                if (index > -1) {
+                    deployList[index]["deployed"] = "O";
+                }
+            });
+            showList();
+        },
+        error: (request, status, error) => {
+            console.log(request);
+        }
+    });
+}
+
+function removeDeployList(path, revision) {
+    var index = deployList.findIndex(i => i.path == path && i.revision == revision);
+    deployList.splice(index,1);
+
+    showList();
+}
+
+function showList() {
+    $("#deployList").html('');
+    deployList.sort((a,b) => {
+        if (a.path < b.path) return -1;
+        if (a.path > b.path) return 1;
+        return a.revision - b.revision;
+    });
+    deployList.forEach(element => {
+        var str = "<tr>";
+        str += "<td>" + element.path + "</td>";
+        str += "<td>" + element.revision + "</td>";
+        str += "<td>" + (element.deployed || "") + "</td>";
+        str += `<td><button onclick='removeDeployList("${element.path}","${element.revision}")'>삭제</button></td>`;
+        str += "</tr>";
+        $("#deployList").append(str);
+    });
+
+    releaseAll();
+}
+
+function insertApply() {
+    $.ajax({
+        type: 'post',
+        url: '/svn/insertApply',
+        async: true,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        dataType: 'json',
+        data: JSON.stringify(deployList),
+        success: (result) => {
+            selectApplys();
+
+            $("#selectedRevision").html('');
+            $("#changedPath").html('');
+            $("#deployList").html('');
+            deployList = [];
+            showList();
+        },
+        error: (request, status, error) => {
+            console.log(request);
+        }
+    });
+}
+
+function updateReadyApply(applyNo) {
+    $.ajax({
+        type: 'post',
+        url: '/svn/updateReadyApply',
+        async: true,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        dataType: 'json',
+        data: JSON.stringify({
+            applyNo: applyNo,
+        }),
+        success: (result) => {
+            selectApplys();
+
+            $("#selectedRevision").html('');
+            $("#changedPath").html('');
+            $("#deployList").html('');
+            deployList = [];
+            showList();
+        },
+        error: (request, status, error) => {
+            console.log(request);
+        }
+    });
+}
+
+function cancleReadyApply(applyNo) {
+    $.ajax({
+        type: 'post',
+        url: '/svn/cancleReadyApply',
+        async: true,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        dataType: 'json',
+        data: JSON.stringify({
+            applyNo: applyNo,
+        }),
+        success: (result) => {
+            selectApplys();
+
+            $("#selectedRevision").html('');
+            $("#changedPath").html('');
+            $("#deployList").html('');
+            deployList = [];
+            showList();
+        },
+        error: (request, status, error) => {
+            console.log(request);
+        }
+    });
+}
+
+function selectAll(input_check) {
+    $("input[name='path']").prop("checked", input_check.checked);
+}
+
+function releaseAll() {
+    $("input:checkbox").prop("checked", false);
+}
