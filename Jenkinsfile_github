@@ -5,12 +5,13 @@ pipeline {
             steps {
                 sh 'pwd'
                 sh 'whoami'
-                sh 'cd github'
             }
         }
         stage("Checkout") {
             steps {
                 script {
+                    // git credentialsId: 'github', url: 'https://github.com/dooyounglee/betting.git'
+                    
                     def response = sh(script: 'curl -X GET "http://host.docker.internal:8080/github/deployReady"', returnStdout: true)
                     echo "${response}"
                     def json = readJSON text: response
@@ -21,7 +22,7 @@ pipeline {
                         echo "${line.commitId}"
                         echo "${line.path}"
                         
-                        sh "echo \'jenkins\' | sudo -kS git checkout ${line.commitId} ${line.path}"
+                        sh "git checkout ${line.commitId} ${line.path}"
                     }
                 }
             }
