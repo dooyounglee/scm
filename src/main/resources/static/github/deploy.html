@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link href="/css/main.css" rel="stylesheet" type="text/css"></style>
+        <script
+            src="https://code.jquery.com/jquery-3.7.1.js"
+            integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+            crossorigin="anonymous"></script>
+        <script type="module">
+            import { selectApplys } from "/js/history.js";
+            import { btnSelectCommits } from "/js/history.js";
+
+            $(function(){
+                selectApplys();
+                
+                $("#btnPage").on('click', () => btnSelectCommits())
+                $("#btnPageBack").on('click', () => btnPageBack())
+                $("#btnPageForward").on('click', () => btnPageForward())
+                btnSelectCommits();
+            });
+
+            const btnPageBack = () => {
+                if ($("#page").val() - 1 < 1) return false;
+                $("#page").val($("#page").val() - 1);
+                btnSelectCommits();
+            }
+
+            const btnPageForward = () => {
+                $("#page").val(parseInt($("#page").val()) + 1);
+                btnSelectCommits();
+            }
+        </script>
+    </head>
+    <body>
+        <h3>배포</h3>
+
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <td>applyNo</td>
+                        <td>applyDt</td>
+                        <td>applySt</td>
+                        <td>상세</td>
+                        <td>배포상태</td>
+                    </tr>
+                </thead>
+                <tbody id="applys">
+                </tbody>
+            </table>
+            <br>
+        </div>
+
+        <div>
+            <div id="selectedApplyNo"></div>
+            <table>
+                <thead>
+                    <tr>
+                        <td>path</td>
+                        <td>commitId</td>
+                        <td>commitDt</td>
+                    </tr>
+                </thead>
+                <tbody id="applyFiles">
+                </tbody>
+            </table>
+            <br>
+        </div>
+
+        <hr>
+
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <td>sha</td>
+                        <td>message</td>
+                        <td>author</td>
+                        <td>date</td>
+                        <td>상세</td>
+                    </tr>
+                </thead>
+                <tbody id="commits">
+                </tbody>
+            </table>
+            <button id="btnPageBack">◀</button>
+            <input id="page" value="1"></input>
+            <button id="btnPage">page</button>
+            <button id="btnPageForward">▶</button>
+            <br>
+        </div>
+
+        <div>
+            <div id="selectedCommitId"></div>
+            <button id="btnAddDeployList">추가</button>
+            <table>
+                <thead>
+                    <tr>
+                        <td><input type="checkbox" id="checkboxSelectAll"></td>
+                        <td>path</td>
+                        <td>status</td>
+                        <td>changes</td>
+                        <td>additions</td>
+                        <td>deletions</td>
+                        <td>선택</td>
+                        <td>내용</td>
+                    </tr>
+                </thead>
+                <tbody id="files"></tbody>
+            </table>
+            <br>
+        </div>
+
+        <div>
+            <button id="btnInsertApply">배포요청</button>
+            <!-- <button id="btnCheckDeployList">확인</button> -->
+            <table>
+                <thead>
+                    <tr>
+                        <td>path</td>
+                        <td>commitId</td>
+                        <td>commitDt</td>
+                        <!-- <td>deployed</td> -->
+                        <td>삭제</td>
+                    </tr>
+                </thead>
+                <tbody id="deployList">
+                </tbody>
+            </table>
+            <br>
+        </div>
+        <script type="module">
+            import { addDeployList, insertApply, selectAll } from "/js/history.js";
+            $("#btnAddDeployList").on("click", addDeployList);
+            $("#btnInsertApply").on("click", insertApply);
+            $("#checkboxSelectAll").on("click", o => selectAll(o));
+        </script>
+    </body>
+</html>

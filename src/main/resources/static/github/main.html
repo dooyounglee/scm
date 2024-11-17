@@ -14,16 +14,8 @@
                 $("#btnPage").on('click', () => btnSelectCommits())
                 $("#btnPageBack").on('click', () => btnPageBack())
                 $("#btnPageForward").on('click', () => btnPageForward())
+
                 btnSelectCommits();
-                // api("/repos/dooyounglee/betting/commits", "GET", selectCommits);
-                // selectRepository();
-                // selectBranches();
-                // selectCommits();
-                // api("/repos/doo/test/contents", "GET", (result) => console.log(JSON.parse(result)));
-                // api("/repos/doo/test/git/blob/17b5cda0be2e2493570476b67eeff15adc8bb787", "GET", console.log);
-                // api("/repos/doo/test/contents/first.txt", "GET");
-                // api("/repos/doo/test/git/commits/a6c3bd4be0", "GET");
-                // api("/repos/doo/test/commits", "GET", console.log);
             });
 
             const btnPageBack = () => {
@@ -66,6 +58,7 @@
             <table>
                 <thead>
                     <tr>
+                        <td><input type="checkbox" id="checkboxSelectAll"></td>
                         <td>path</td>
                         <td>status</td>
                         <td>changes</td>

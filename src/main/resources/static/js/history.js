@@ -25,20 +25,23 @@ export const selectCommits = (result) => {
         str += "<td><button>상세</button></td>";
         str += "</tr>";
         $("#commits").append(str);
-        $("#commits tr:last td:nth-child(5)").on('click', () => btnSelectFiles(element.sha))
+        $("#commits tr:last td:nth-child(5)").on('click', () => btnSelectFiles(element.sha, element.commit.committer.date))
     });
 }
 
-export const btnSelectFiles = (sha) => {
-    api("/repos/dooyounglee/betting/commits/" + sha, "GET", selectFiles, sha);
+export const btnSelectFiles = (sha, commitDt) => {
+    api("/repos/dooyounglee/betting/commits/" + sha, "GET", selectFiles, sha, commitDt);
 }
 
-const selectFiles = (result, sha) => {
+const selectFiles = (result, sha, commitDt) => {
+    $("#selectedCommitId").text(sha);
+
     clearFiles();
     clearCommitsByFile();
     clearCompare();
     result.files.forEach(element => {
         var str = "<tr>";
+        str += "<td>" + "<input type='checkbox' name='path'>" + "</td>"
         str += "<td>" + element.filename + "</td>";
         str += "<td>" + element.status + "</td>";
         str += "<td>" + element.changes + "</td>";
@@ -48,8 +51,9 @@ const selectFiles = (result, sha) => {
         str += `<td><button>상세</button></td>`;
         str += "</tr>";
         $("#files").append(str);
-        $("#files tr:last td:nth-child(6)").on('click', () => btnSelectCommitsByFile(element.filename))
-        $("#files tr:last td:nth-child(7)").on('click', () => btnRawFileContent(element.filename, sha))
+        $("#files tr:last td:nth-child(6)").on('click', () => btnSelectCommitsByFile(element.filename));
+        $("#files tr:last td:nth-child(7)").on('click', () => btnRawFileContent(element.filename, sha));
+        $("#files tr:last td:nth-child(1) input").data('path', element.filename).data('commitDt', commitDt);
     });
 }
 
@@ -70,7 +74,7 @@ const selectCommitsByFile = (result, path) => {
         str += "<td><button>비교</button></td>";
         str += "</tr>";
         $("#commitsByFile").append(str);
-        $("#commitsByFile tr:last td:nth-child(6)").on('click', () => btnCompareCommits(path))
+        $("#commitsByFile tr:last td:nth-child(6)").on('click', () => btnCompareCommits(path));
     });
 }
 
@@ -184,10 +188,11 @@ const clearCommitsByFile = () => {
 }
 
 const clearCompare = () => {
-    document.getElementById("tb").innerHTML = '';
+    if (document.getElementById("tb") != undefined)
+        document.getElementById("tb").innerHTML = '';
 }
 
-export const api = async (url, method, callback, args) => {
+export const api = async (url, method, callback, ...args) => {
     var result = await octokit.request(method + " " + url, {
         owner: 'OWNER',
         repo: 'REPO',
@@ -195,6 +200,244 @@ export const api = async (url, method, callback, args) => {
             'X-GitHub-Api-Version': '2022-11-28',
         }
     });
-    console.log(result, args);
-    callback(result.data, args);
+    console.log(result, ...args);
+    callback(result.data, ...args);
+}
+
+export const selectApplys = () => {
+    $.ajax({
+        type: 'get',
+        url: '/github/selectApplys',
+        async: true,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        // dataType: 'text',
+        // data: JSON.stringify({}),
+        success: (result) => {
+            $("#applys").html('');
+            result.reverse().forEach(element => {
+                var str = "<tr>";
+                str += "<td>" + element.applyNo + "</td>";
+                str += "<td>" + element.applyDt + "</td>";
+                str += "<td>" + element.applySt + "</td>";
+                str += `<td><button>상세</button></td>`;
+                if (element.applySt == "None") str += `<td><button>배포준비</button></td>`;
+                if (element.applySt == "Ready") str += `<td><button>배포취소</button></td>`;
+                if (element.applySt == "Deploy") str += `<td>완료</td>`;
+                str += "</tr>";
+                $("#applys").append(str);
+                $("#applys tr:last td:nth-child(4)").on('click', () => selectApply(element.applyNo));
+                if (element.applySt == "None") $("#applys tr:last td:nth-child(5)").on('click', () => updateReadyApply(element.applyNo));
+                if (element.applySt == "Ready") $("#applys tr:last td:nth-child(5)").on('click', () => cancleReadyApply(element.applyNo));
+            });
+        },
+        error: (request, status, error) => {
+            console.log(error);
+        }
+    });
+}
+
+const selectApply = (applyNo) => {
+    $.ajax({
+        type: 'post',
+        url: '/github/selectApplyFiles',
+        async: true,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        dataType: 'json',
+        data: JSON.stringify({
+            applyNo: applyNo
+        }),
+        success: (result) => {
+            $("#selectedApplyNo").text(applyNo);
+
+            $("#applyFiles").html('');
+            result.sort((a,b) => {
+                if (a.path < b.path) return -1;
+                if (a.path > b.path) return 1;
+                return 0;
+            });
+            result.forEach(element => {
+                var str = "<tr>";
+                str += "<td>" + element.path + "</td>";
+                str += "<td>" + element.commitId + "</td>";
+                str += "<td>" + element.commitDt + "</td>";
+                str += "</tr>";
+                $("#applyFiles").append(str);
+            });
+        },
+        error: (request, status, error) => {
+            console.log(error);
+        }
+    });
+}
+
+let deployList = [];
+                
+export const addDeployList = () => {
+    var selectedCommitId = $("#selectedCommitId").text();
+    $("input[name='path']:checked").each((i,e) => {
+        var index = deployList.findIndex(i => i.path == e.value && i.commitId == selectedCommitId);
+        if (index > -1) return false;
+
+        var obj = {};
+        obj["commitId"] = selectedCommitId;
+        obj["path"] = $(e).data("path");
+        obj["commitDt"] = $(e).data("commitDt");
+        deployList.push(obj);
+    });
+
+    showList();
+}
+
+// const checkDeployList = () => {
+//     $.ajax({
+//         type: 'post',
+//         url: '/github/checkDeployList',
+//         async: true,
+//         headers: {
+//             "Content-Type": "application/json",
+//         },
+//         dataType: 'json',
+//         data: JSON.stringify(deployList),
+//         success: (result) => {
+//             result.forEach(e => {
+//                 var index = deployList.findIndex(i => i.path == e.path);
+//                 if (index > -1) {
+//                     deployList[index]["deployed"] = "O";
+//                 }
+//             });
+//             showList();
+//         },
+//         error: (request, status, error) => {
+//             console.log(request);
+//         }
+//     });
+// }
+
+const removeDeployList = (path, commitId) => {
+    var index = deployList.findIndex(i => i.path == path && i.commitId == commitId);
+    deployList.splice(index,1);
+
+    showList();
+}
+
+const showList= () => {
+    $("#deployList").html('');
+    /* deployList.sort((a,b) => {
+        if (a.path < b.path) return -1;
+        if (a.path > b.path) return 1;
+        return 0;
+    }); */
+    deployList.sort((a,b) => sortObject(a,b,"path","commitId"));
+    deployList.forEach(element => {
+        var str = "<tr>";
+        str += "<td>" + element.path + "</td>";
+        str += "<td>" + element.commitId + "</td>";
+        str += "<td>" + element.commitDt + "</td>";
+        // str += "<td>" + (element.deployed || "") + "</td>";
+        str += `<td><button>삭제</button></td>`;
+        str += "</tr>";
+        $("#deployList").append(str);
+        $("#deployList tr:last td:nth-child(4)").on('click', () => removeDeployList(element.path, element.commitId));
+    });
+
+    releaseAll();
+}
+
+const sortObject = (a,b, ...param) => {
+    for (var i=0; i<param.length; i++) {
+        if (a[param[i]] < b[param[i]]) return -1;
+        if (a[param[i]] > b[param[i]]) return 1;
+    }
+    return 0;
+}
+
+export const insertApply = () => {
+    $.ajax({
+        type: 'post',
+        url: '/github/insertApply',
+        async: true,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        dataType: 'json',
+        data: JSON.stringify(deployList),
+        success: (result) => {
+            selectApplys();
+
+            $("#selectedCommitId").html('');
+            $("#changedPath").html('');
+            $("#deployList").html('');
+            deployList = [];
+            showList();
+        },
+        error: (request, status, error) => {
+            console.log(request);
+        }
+    });
+}
+
+const updateReadyApply = (applyNo) => {
+    $.ajax({
+        type: 'post',
+        url: '/github/updateReadyApply',
+        async: true,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        dataType: 'json',
+        data: JSON.stringify({
+            applyNo: applyNo,
+        }),
+        success: (result) => {
+            selectApplys();
+
+            $("#selectedCommitId").html('');
+            $("#changedPath").html('');
+            $("#deployList").html('');
+            deployList = [];
+            showList();
+        },
+        error: (request, status, error) => {
+            console.log(request);
+        }
+    });
+}
+
+const cancleReadyApply = (applyNo) => {
+    $.ajax({
+        type: 'post',
+        url: '/github/cancleReadyApply',
+        async: true,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        dataType: 'json',
+        data: JSON.stringify({
+            applyNo: applyNo,
+        }),
+        success: (result) => {
+            selectApplys();
+
+            $("#selectedCommitId").html('');
+            $("#changedPath").html('');
+            $("#deployList").html('');
+            deployList = [];
+            showList();
+        },
+        error: (request, status, error) => {
+            console.log(request);
+        }
+    });
+}
+
+export const selectAll = (input_check) => {
+    $("input[name='path']").prop("checked", input_check.target.checked);
+}
+
+export const releaseAll = () => {
+    $("input:checkbox").prop("checked", false);
 }
