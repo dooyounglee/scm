@@ -12,16 +12,12 @@ pipeline {
                 script {
                     // git credentialsId: 'github', url: 'https://github.com/dooyounglee/betting.git'
                     
+                    // sh 'git reset --hard 97d715faa79697d85dc94a84acad7e6fdd088add'
+                    
                     def response = sh(script: 'curl -X GET "http://host.docker.internal:8080/github/deployReady"', returnStdout: true)
-                    echo "${response}"
                     def json = readJSON text: response
-                    echo "${json}"
                     
                     json.each { line ->
-                        echo "${line}"
-                        echo "${line.commitId}"
-                        echo "${line.path}"
-                        
                         sh "git checkout ${line.commitId} ${line.path}"
                     }
                 }
@@ -33,6 +29,26 @@ pipeline {
                     def response = sh(script: 'curl -X GET "http://host.docker.internal:8080/github/updateDeployApply"', returnStdout: true)
                     echo "${response} updates"
                 }
+            }
+        }
+        stage("Permission") {
+            steps {
+                sh 'chmod u+x mvnw'
+            }
+        }
+        /* stage("Clean") {
+            steps {
+                sh 'rm -rf target'
+            }
+        } */
+        stage("Build") {
+            steps {
+                sh './mvnw clean package'
+            }
+        }
+        stage("Server start") {
+            steps {
+                sh 'java -jar target/*.jar'
             }
         }
     }
