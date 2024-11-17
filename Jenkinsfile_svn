@@ -37,5 +37,20 @@ pipeline {
                 }
             }
         }
+        /* stage("Permission") {
+            steps {
+                sh 'chmod 777 mvnw'
+            }
+        }
+        stage("Build") {
+            steps {
+                sh './mvnw clean package'
+            }
+        }
+        stage("Server start") {
+            steps {
+                sh 'java --jar target/*.jar'
+            }
+        } */
     }
 }
