@@ -23,24 +23,16 @@ pipeline {
                 }
             }
         }
-        stage("Deploy Success") {
-            steps {
-                script {
-                    def response = sh(script: 'curl -X GET "http://host.docker.internal:8080/github/updateDeployApply"', returnStdout: true)
-                    echo "${response} updates"
-                }
-            }
-        }
-        stage("Permission") {
+        /* stage("Permission") {
             steps {
                 sh 'chmod u+x mvnw'
             }
         }
-        /* stage("Clean") {
+        stage("Clean") {
             steps {
                 sh 'rm -rf target'
             }
-        } */
+        }
         stage("Build") {
             steps {
                 sh './mvnw clean package'
@@ -49,6 +41,14 @@ pipeline {
         stage("Server start") {
             steps {
                 sh 'java -jar target/*.jar'
+            }
+        } */
+        stage("Deploy Success") {
+            steps {
+                script {
+                    def response = sh(script: 'curl -X GET "http://host.docker.internal:8080/github/updateDeployApply"', returnStdout: true)
+                    echo "${response} updates"
+                }
             }
         }
     }

@@ -29,6 +29,26 @@ pipeline {
                 }
             }
         }
+        /* stage("Permission") {
+            steps {
+                sh 'chmod u+x mvnw'
+            }
+        }
+        stage("Clean") {
+            steps {
+                sh 'rm -rf target'
+            }
+        }
+        stage("Build") {
+            steps {
+                sh './mvnw clean package'
+            }
+        }
+        stage("Server start") {
+            steps {
+                sh 'java -jar target/*.jar'
+            }
+        } */
         stage("Deploy Success") {
             steps {
                 script {
