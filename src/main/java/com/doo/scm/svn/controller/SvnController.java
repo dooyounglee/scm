@@ -1,7 +1,6 @@
 package com.doo.scm.svn.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,12 +56,5 @@ public class SvnController {
     public ResponseEntity<SvnResponse> selectFileDiff(@RequestBody RevisionSelect dto) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(SvnResponse.from(svnService.selectFileDiff(dto)));
-    }
-
-    @ResponseBody
-    @RequestMapping("/deployReady")
-    public ResponseEntity<List<Map<String, String>>> deployReady() {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(svnService.deployReady());
     }
 }
