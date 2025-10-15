@@ -89,11 +89,31 @@
 		</dependency>
 		<!-- oracle cloud database -->
 
+		<!-- PostgreSQL-->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.tmatesoft.svnkit/svnkit -->
 		<dependency>
 			<groupId>org.tmatesoft.svnkit</groupId>
 			<artifactId>svnkit</artifactId>
 			<version>1.10.11</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.kohsuke/github-api -->
+		<dependency>
+			<groupId>org.kohsuke</groupId>
+			<artifactId>github-api</artifactId>
+			<version>1.330</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.github.java-diff-utils/java-diff-utils -->
+		<dependency>
+			<groupId>io.github.java-diff-utils</groupId>
+			<artifactId>java-diff-utils</artifactId>
+			<version>4.12</version>
 		</dependency>
 	</dependencies>
 
