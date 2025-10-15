@@ -51,8 +51,8 @@ const selectFiles = (result, sha, commitDt) => {
         str += `<td><button>상세</button></td>`;
         str += "</tr>";
         $("#files").append(str);
-        $("#files tr:last td:nth-child(6)").on('click', () => btnSelectCommitsByFile(element.filename));
-        $("#files tr:last td:nth-child(7)").on('click', () => btnRawFileContent(element.filename, sha));
+        $("#files tr:last td:nth-child(7)").on('click', () => btnSelectCommitsByFile(element.filename));
+        $("#files tr:last td:nth-child(8)").on('click', () => btnRawFileContent(element.filename, sha));
         $("#files tr:last td:nth-child(1) input").data('path', element.filename).data('commitDt', commitDt);
     });
 }
@@ -72,9 +72,11 @@ const selectCommitsByFile = (result, path) => {
         str += "<td>" + element.commit.committer.name + "</td>";
         str += "<td>" + element.commit.committer.date + "</td>";
         str += "<td><button>비교</button></td>";
+        str += "<td><button>java비교</button></td>";
         str += "</tr>";
         $("#commitsByFile").append(str);
         $("#commitsByFile tr:last td:nth-child(6)").on('click', () => btnCompareCommits(path));
+        $("#commitsByFile tr:last td:nth-child(7)").on('click', () => btnCompareCommits_java(path));
     });
 }
 
@@ -173,6 +175,12 @@ const compareCommits = (result, path) => {
             i++;
         }
     }
+}
+
+const btnCompareCommits_java = (path) => {
+    var commit = $("input[name='commit']:checked")[0].value;
+    var commit1 = $("input[name='commit']:checked")[1].value;
+    window.open(`/github/compare?commit=${commit}&commit1=${commit1}&path=${path}&repository=dooyounglee/betting&personalAccessToken=${githubPersonalAccessToken}`)
 }
 
 const clearCommits = () => {
