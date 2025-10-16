@@ -234,6 +234,7 @@ const clearCommitsByFile = () => {
 const clearCompare = () => {
     if (document.getElementById("tb") != undefined)
         document.getElementById("tb").innerHTML = '';
+    document.getElementById("diff").innerHTML = '';
 }
 
 export const api = async (url, method, callback, ...args) => {
