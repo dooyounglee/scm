@@ -99,7 +99,6 @@ const btnCompareCommits = (path) => {
 
 const compareCommits = (result, path) => {
     clearCompare();
-    alert(path)
     
     var compare = result.files.filter(file => file.previous_filename || file.filename == path)[0].patch;
     compare = compare.replace(/ @@ /gi," @@\n ");
@@ -196,7 +195,6 @@ const btnCompareCommits_script = (path) => {
     }
     api(`/repos/dooyounglee/betting/contents/${path}?ref=${commit}`, "GET", _getRawFileContent1);
     api(`/repos/dooyounglee/betting/contents/${path}?ref=${commit1}`, "GET", _getRawFileContent2);
-
 
     const draw = (o,n) => {
         // Unified diff 생성
