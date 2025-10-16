@@ -73,10 +73,12 @@ const selectCommitsByFile = (result, path) => {
         str += "<td>" + element.commit.committer.date + "</td>";
         str += "<td><button>비교</button></td>";
         str += "<td><button>java비교</button></td>";
+        str += "<td><button>script비교</button></td>";
         str += "</tr>";
         $("#commitsByFile").append(str);
         $("#commitsByFile tr:last td:nth-child(6)").on('click', () => btnCompareCommits(path));
         $("#commitsByFile tr:last td:nth-child(7)").on('click', () => btnCompareCommits_java(path));
+        $("#commitsByFile tr:last td:nth-child(8)").on('click', () => btnCompareCommits_script(path));
     });
 }
 
@@ -174,6 +176,42 @@ const compareCommits = (result, path) => {
         if (compare[i][0] == "@" && compare[i][1] == "@") {
             i++;
         }
+    }
+}
+
+const btnCompareCommits_script = (path) => {
+    var commit = $("input[name='commit']:checked")[0].value;
+    var commit1 = $("input[name='commit']:checked")[1].value;
+    // api(`/repos/dooyounglee/betting/compare/${commit1}...${commit}`, "GET", compareCommits, path);
+
+    var oldText,newText;
+
+    const _getRawFileContent1 = result => {
+        oldText = decodeURIComponent(escape(atob(result.content)));
+        if (oldText && newText) draw(oldText, newText);
+    }
+    const _getRawFileContent2 = result => {
+        newText = decodeURIComponent(escape(atob(result.content)));
+        if (oldText && newText) draw(oldText, newText);
+    }
+    api(`/repos/dooyounglee/betting/contents/${path}?ref=${commit}`, "GET", _getRawFileContent1);
+    api(`/repos/dooyounglee/betting/contents/${path}?ref=${commit1}`, "GET", _getRawFileContent2);
+
+
+    const draw = (o,n) => {
+        // Unified diff 생성
+        const diff = Diff.createTwoFilesPatch('OldFile.js', 'NewFile.js', o, n, '', '', { context: Number.MAX_SAFE_INTEGER });
+
+        // diff2html 렌더링
+        const targetElement = document.getElementById('diff');
+
+        const diff2htmlUi = new Diff2HtmlUI(targetElement, diff, {
+            drawFileList: false,
+            outputFormat: 'side-by-side',
+            matching: 'lines'
+        });
+
+        diff2htmlUi.draw();
     }
 }
 

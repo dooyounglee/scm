@@ -1,3 +1,2 @@
-* { background-color: black; color: rgb(138, 138, 138); }
-td { border: solid 1px; white-space: pre-wrap; }
+.me td { border: solid 1px; white-space: pre-wrap; }
 textarea { width: 500px; }
