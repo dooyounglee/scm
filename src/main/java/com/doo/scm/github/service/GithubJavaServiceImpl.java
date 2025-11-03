@@ -131,7 +131,7 @@ td { white-space: pre; padding: 2px 8px; vertical-align: top; }
         while (baseIndex < original.size() || headIndex < revised.size()) {
             String left = (baseIndex < original.size()) ? original.get(baseIndex) : "";
             String right = (headIndex < revised.size()) ? revised.get(headIndex) : "";
-            appendRow(sb, left, ++baseIndex, right, ++headIndex, "same");
+            appendRow(sb, left, baseIndex++, right, headIndex++, "same");
         }
 
         sb.append("</table></body></html>");
@@ -152,8 +152,10 @@ td { white-space: pre; padding: 2px 8px; vertical-align: top; }
 
     private String escapeHtml(String s) {
         return s == null ? ""
-                : s.replace("&", "&")
-                        .replace("<", "<")
-                        .replace(">", ">");
+                : s.replace("&", "&amp;")
+                        .replace("<", "&lt;")
+                        .replace(">", "&gt;")
+                        .replace("\"", "&quot;")
+                        .replace("'", "&#39;");
     }
 }
