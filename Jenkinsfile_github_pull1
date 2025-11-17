@@ -1,0 +1,131 @@
+pipeline {
+    agent any
+
+    environment {
+        BASE = "${WORKSPACE}/build_src"
+        RUNTIME = "${WORKSPACE}/build_temp"
+        NEW_SRC = "${WORKSPACE}/build_src/src-${BUILD_NUMBER}"
+        // OLD_SRC = "${WORKSPACE}/build_src/src-${BUILD_NUMBER - 1}"
+        RUN_SRC = "${WORKSPACE}/build_temp/${BUILD_NUMBER}-build"
+    }
+
+    stages {
+        stage("Hello") {
+            steps {
+                sh 'pwd'
+                sh 'whoami'
+                sh "echo BASE: ${BASE}"
+                sh "echo RUNTIME: ${RUNTIME}"
+                sh "echo NEW_SRC: ${NEW_SRC}"
+                // sh "echo OLD_SRC: ${OLD_SRC}"
+                sh "echo RUN_SRC: ${RUN_SRC}"
+            }
+        }
+        stage("Prepare Source") {
+            steps {
+                script {
+                    sh "mkdir -p ${BASE}"
+                    sh "mkdir -p ${RUNTIME}"
+
+                    def oldSrc = "${env.BASE}/src-${env.BUILD_NUMBER.toInteger() - 1}"
+                    echo "OLD_SRC (calculated): ${oldSrc}"
+
+                    if (env.BUILD_NUMBER.toInteger() == 1) {
+                        sh "git clone https://github.com/dooyounglee/item1.git ${NEW_SRC}"
+                    } else {
+                        // 이전 빌드 소스 복사
+                        sh "cp -R ${oldSrc} ${NEW_SRC}"
+
+                        // 필요한 파일만 지정된 commit으로 복원
+                        dir(NEW_SRC) {
+                            sh "git fetch --all"
+
+                            // def response = sh(script: 'curl -X GET "http://host.docker.internal:8080/github/deployReady"', returnStdout: true)
+                            // def json = readJSON text: response
+                            // 
+                            // json.each { line ->
+                            //     sh "git checkout ${line.commitId} ${line.path}"
+                            // }
+                            sh "git pull origin master"
+
+                            sh "ls -alR"  // 조립된 실제 소스 확인용
+                        }
+                    }
+                }
+            }
+        }
+        stage("Prepare Build Workspace") {
+            steps {
+                script {
+                    sh "cp -R ${NEW_SRC} ${RUN_SRC}"
+                }
+            }
+        }
+        stage("Permission") {
+            steps {
+                dir ("${RUN_SRC}") {
+                    sh 'chmod u+x mvnw'
+                }
+            }
+        }
+        stage("Clean") {
+            steps {
+                dir ("${RUN_SRC}") {
+                    sh './mvnw clean'
+                }
+            }
+        }
+        stage("Build") {
+            steps {
+                dir ("${RUN_SRC}") {
+                    sh './mvnw package -DskipTests'
+                }
+            }
+        }
+        stage("Server start") {
+            steps {
+                dir ("${RUN_SRC}") {
+                    // sh 'java -jar target/*.jar'
+                    sh '''
+                        #!/bin/bash
+                        set -e
+                        
+                        if [ -f app.pid ]; then
+                            PID=$(cat app.pid)
+                            if kill -0 $PID 2>/dev/null; then
+                                echo "기존 프로세스 종료: PID $PID"
+                                kill $PID
+                            else
+                                echo "기존 PID $PID 프로세스 없음"
+                            fi
+                            rm app.pid
+                        fi
+
+                        # 백그라운드로 서버 실행
+                        nohup java -jar target/*.jar > app.log 2>&1 & echo $! > app.pid
+        
+                        # 서버 기동 확인 (포트나 로그 기준 등으로)
+                        echo "서버 기동 대기 중..."
+                        for i in $(seq 1 15); do
+                            echo "서버 기동 확인 시도 $i/15"
+                            sleep 2
+                            if curl -s -f http://localhost:8081/actuator/health | grep -q '"status":"UP"'; then
+                                echo "서버 기동 성공"
+                                exit 0
+                            fi
+                        done
+
+                        echo "서버 기동 실패"
+                        exit 1
+                    '''
+                }
+            }
+        }
+    }
+}
+
+변경된 파일만 sync하는 고급 rsync 전략
+
+git merge 충돌 날 때 자동 해결(ours/theirs)
+
+src-N 폴더 수가 많아졌을 때 자동 정리 정책
